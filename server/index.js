@@ -6,7 +6,7 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- 1. CORS CONFIGURATION (FIXED) ---
+// --- 1. CORS CONFIGURATION ---
 app.use(cors({
   origin: "*", 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -14,30 +14,26 @@ app.use(cors({
   credentials: true
 }));
 
-// --- ERROR FIX HERE ---
-// Purana code: app.options('*', cors());  <-- Ye Ghalat tha
-// Naya code:
-app.options(cors()); // Bas '*' hata dein, ye khud samajh jayega
+// --- 2. PREFLIGHT FIX (REGEX USE KAREIN) ---
+// '*' ki jagah /.*/ use karein, yeh error nahi dega
+app.options(/.*/, cors());
 
 // Middleware
 app.use(express.json());
 
 // --- ROUTES ---
 
-// 1. Test Route
+// Test Route
 app.get('/', (req, res) => {
-  res.json({ 
-    status: "Success", 
-    message: "Luxe Stone Backend is Live & Ready!" 
-  });
+  res.json({ status: "Success", message: "Luxe Stone Backend is Live!" });
 });
 
-// 2. Contact Form Email API
+// Contact Email API
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, message } = req.body;
 
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    return res.status(500).json({ success: false, message: "Server Config Error: Credentials missing" });
+    return res.status(500).json({ success: false, message: "Credentials Missing" });
   }
 
   try {
@@ -56,12 +52,12 @@ app.post('/api/contact', async (req, res) => {
     res.status(200).json({ success: true, message: 'Email sent successfully!' });
 
   } catch (error) {
-    console.error("Contact Email Error:", error);
+    console.error("Email Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// 3. Order Confirmation Email API
+// Order Email API
 app.post('/api/order-email', async (req, res) => {
   const { customer_name, total_amount, orderId, cart_items, payment_method } = req.body;
 
@@ -78,7 +74,7 @@ app.post('/api/order-email', async (req, res) => {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
-      subject: `📢 New Order #${orderId} - Rs. ${total_amount}`,
+      subject: `📢 New Order #${orderId}`,
       text: `
         🎉 NEW ORDER RECEIVED!
         
@@ -89,8 +85,6 @@ app.post('/api/order-email', async (req, res) => {
         
         ITEMS:
         ${itemsList}
-        
-        Login to Admin Panel for details.
       `
     });
 
@@ -102,7 +96,7 @@ app.post('/api/order-email', async (req, res) => {
   }
 });
 
-// --- VERCEL EXPORT SETUP ---
+// --- VERCEL EXPORT ---
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`✅ Server running locally on port ${PORT}`);
