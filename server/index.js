@@ -1,110 +1,75 @@
-// server/index.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// --- CORS SETUP (MOST IMPORTANT) ---
+// Iska matlab hai: "Duniya ki kisi bhi website ko ye API use karne do"
+// Isse connection error khatam ho jayega.
+app.use(cors({
+  origin: "*", 
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
 app.use(express.json());
 
-// --- Note: MongoDB connection removed because we use Supabase ---
+// --- ROUTES ---
 
-// Test Route
+// 1. Test Route (Jo browser mein dikhta hai)
 app.get('/', (req, res) => {
-  res.send('Luxe Stone Email Server is Running!');
+  res.json({ status: "Success", message: "Luxe Stone Backend is Live & Running!" });
 });
 
-// 1. CONTACT FORM EMAIL API
+// 2. Contact Email API
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, message } = req.body;
-
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
     });
-
-    const mailOptions = {
+    await transporter.sendMail({
       from: email,
       to: process.env.EMAIL_USER,
       subject: `New Contact Msg from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nMessage: ${message}`
-    };
-
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({ success: true, message: 'Email sent successfully!' });
-
+    });
+    res.status(200).json({ success: true, message: 'Email sent!' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Server Error' });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// 2. ORDER CONFIRMATION EMAIL API
+// 3. Order Email API
 app.post('/api/order-email', async (req, res) => {
-  const { customer_name, email, phone, address, total_amount, cart_items, orderId, payment_method } = req.body;
-
+  const { customer_name, total_amount, orderId, cart_items, payment_method } = req.body;
   try {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
     });
 
-    // Products list format karna
-    const productDetails = cart_items.map(item => 
-      `- ${item.name} (Qty: ${item.quantity}) = Rs. ${item.price * item.quantity}`
-    ).join('\n');
+    const itemsList = cart_items.map(i => `${i.name} (x${i.quantity})`).join('\n');
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER, 
-      to: process.env.EMAIL_USER,   // Admin ko email aayegi
-      subject: `📢 New Order #${orderId} from ${customer_name}`,
-      text: `
-        🎉 Congratulations! A new order has arrived.
-        
-        ------------------------------------
-        ORDER DETAILS:
-        Order ID: #${orderId}
-        Total Amount: Rs. ${total_amount}
-        Payment Method: ${payment_method ? payment_method.toUpperCase() : 'COD'}
-        ------------------------------------
-        
-        CUSTOMER DETAILS:
-        Name: ${customer_name}
-        Phone: ${phone}
-        Email: ${email}
-        Address: ${address}
-
-        ------------------------------------
-        PRODUCTS ORDERED:
-        ${productDetails}
-        ------------------------------------
-        
-        Please go to the Admin Panel and check.
-      `
-    };
-
-    await transporter.sendMail(mailOptions);
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      subject: `New Order #${orderId}`,
+      text: `Customer: ${customer_name}\nAmount: Rs. ${total_amount}\nPayment: ${payment_method}\n\nItems:\n${itemsList}`
+    });
     res.status(200).json({ success: true, message: 'Order Email sent!' });
-
   } catch (error) {
-    console.error("Email Error:", error);
-    res.status(500).json({ success: false, message: 'Failed to send email' });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// --- VERCEL DEPLOYMENT SETUP ---
-
-// Sirf Localhost par chalane ke liye (Vercel par ye ignore hoga)
+// --- VERCEL EXPORT (Zaroori Hai) ---
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-// Vercel ke liye Export zaroori hai
 module.exports = app;
