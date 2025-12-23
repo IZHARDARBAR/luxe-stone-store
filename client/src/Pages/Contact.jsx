@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Facebook, Instagram, } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram } from 'lucide-react';
 import toast from 'react-hot-toast'; 
 
 const Contact = () => {
@@ -18,7 +18,7 @@ const Contact = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // --- HANDLE SUBMIT WITH TOAST ---
+  // --- HANDLE SUBMIT ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -26,7 +26,8 @@ const Contact = () => {
     const toastId = toast.loading("Sending message...");
 
     try {
-      const response = await fetch('https://luxe-backend-nh8occsdk-izhardarbars-projects.vercel.app/', {
+      // ✅ CORRECTED URL: Base URL + /api/contact
+      const response = await fetch('https://luxe-backend-nh8occsdk-izhardarbars-projects.vercel.app/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -54,7 +55,7 @@ const Contact = () => {
     <div className="font-sans text-gray-900">
       
       {/* 1. HERO SECTION */}
-      <div className="relative h-[100vh] w-full flex items-center justify-center text-center text-white">
+      <div className="relative h-[50vh] w-full flex items-center justify-center text-center text-white">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=2000" 
@@ -139,10 +140,9 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* 4. BOTTOM CTA (NIKE MIX COLLECTION IMAGE ADDED) */}
+      {/* 4. BOTTOM CTA (Nike Shoes Image) */}
       <section className="relative h-[400px] w-full flex items-center justify-center text-center text-white">
         <div className="absolute inset-0">
-          {/* --- NEW IMAGE: Nike Collection (Jordans, AF1, Dunks Mix) --- */}
           <img 
             src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=2000" 
             alt="Nike Sneakers Collection" 
