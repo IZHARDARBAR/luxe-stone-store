@@ -97,7 +97,14 @@ app.post('/api/order-email', async (req, res) => {
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`✅ Email Server is running on port ${PORT}`);
-});
+// --- VERCEL DEPLOYMENT SETUP ---
+
+// Sirf Localhost par chalane ke liye (Vercel par ye ignore hoga)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+  });
+}
+
+// Vercel ke liye Export zaroori hai
+module.exports = app;
