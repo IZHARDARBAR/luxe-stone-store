@@ -26,7 +26,7 @@ const Contact = () => {
     const toastId = toast.loading("Sending message...");
 
     try {
-      const response = await fetch('https://luxe-backend-git-main-izhardarbars-projects.vercel.app/', {
+      const response = await fetch('https://luxe-backend-nh8occsdk-izhardarbars-projects.vercel.app/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

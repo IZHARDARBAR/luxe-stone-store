@@ -49,7 +49,7 @@ const Checkout = () => {
       
       // Email Sending Logic (Backend)
       try {
-        await fetch('https://luxe-backend-git-main-izhardarbars-projects.vercel.app/', {
+        await fetch('https://luxe-backend-nh8occsdk-izhardarbars-projects.vercel.app/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...orderData, orderId: newOrderId })
