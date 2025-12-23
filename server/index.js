@@ -7,16 +7,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- 1. CORS CONFIGURATION (FIXED) ---
-// Yeh sabse zaroori hissa hai error hatane ke liye
 app.use(cors({
-  origin: "*", // Sabko allow karo (Localhost aur Live Website dono ko)
+  origin: "*", 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
-// Preflight Requests ko handle karo (Browser check karta hai ke server allow kar raha hai ya nahi)
-app.options('*', cors());
+// --- ERROR FIX HERE ---
+// Purana code: app.options('*', cors());  <-- Ye Ghalat tha
+// Naya code:
+app.options(cors()); // Bas '*' hata dein, ye khud samajh jayega
 
 // Middleware
 app.use(express.json());
@@ -35,7 +36,6 @@ app.get('/', (req, res) => {
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, message } = req.body;
 
-  // Check secrets
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     return res.status(500).json({ success: false, message: "Server Config Error: Credentials missing" });
   }
@@ -47,8 +47,8 @@ app.post('/api/contact', async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: email, // Sender ka email (Note: Gmail isay override karke owner ka email dikha sakta hai)
-      to: process.env.EMAIL_USER, // Admin ko email jayegi
+      from: email,
+      to: process.env.EMAIL_USER,
       subject: `New Contact Msg from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nMessage: ${message}`
     });
@@ -71,14 +71,13 @@ app.post('/api/order-email', async (req, res) => {
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
     });
 
-    // Items List Format
     const itemsList = cart_items 
       ? cart_items.map(i => `- ${i.name} (x${i.quantity})`).join('\n')
       : "No items details";
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER, // Admin Email
+      to: process.env.EMAIL_USER,
       subject: `📢 New Order #${orderId} - Rs. ${total_amount}`,
       text: `
         🎉 NEW ORDER RECEIVED!
@@ -104,12 +103,10 @@ app.post('/api/order-email', async (req, res) => {
 });
 
 // --- VERCEL EXPORT SETUP ---
-// Agar Localhost hai to port par chalao
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`✅ Server running locally on port ${PORT}`);
   });
 }
 
-// Vercel ke liye App ko Export karo
 module.exports = app;
