@@ -6,34 +6,33 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- 1. CORS CONFIGURATION ---
+// --- 1. CORS CONFIGURATION (UPDATED) ---
 app.use(cors({
-  origin: "*", 
+  origin: "*", // Sabko allow karo
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
-// --- 2. PREFLIGHT FIX (REGEX USE KAREIN) ---
-// '*' ki jagah /.*/ use karein, yeh error nahi dega
-app.options(/.*/, cors());
+// --- 2. PREFLIGHT REQUESTS HANDLE KARO ---
+// Yeh line bohot zaroori hai Vercel ke liye
+app.options('*', cors());
 
-// Middleware
 app.use(express.json());
 
 // --- ROUTES ---
 
-// Test Route
 app.get('/', (req, res) => {
-  res.json({ status: "Success", message: "Luxe Stone Backend is Live!" });
+  res.json({ message: "Backend is Live!" });
 });
 
-// Contact Email API
+// Contact API
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, message } = req.body;
 
+  // Check Password
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    return res.status(500).json({ success: false, message: "Credentials Missing" });
+    return res.status(500).json({ success: false, message: "Credentials Missing in Vercel" });
   }
 
   try {
@@ -45,14 +44,12 @@ app.post('/api/contact', async (req, res) => {
     await transporter.sendMail({
       from: email,
       to: process.env.EMAIL_USER,
-      subject: `New Contact Msg from ${name}`,
+      subject: `New Contact from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nMessage: ${message}`
     });
 
-    res.status(200).json({ success: true, message: 'Email sent successfully!' });
-
+    res.status(200).json({ success: true, message: 'Email sent!' });
   } catch (error) {
-    console.error("Email Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -67,40 +64,23 @@ app.post('/api/order-email', async (req, res) => {
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
     });
 
-    const itemsList = cart_items 
-      ? cart_items.map(i => `- ${i.name} (x${i.quantity})`).join('\n')
-      : "No items details";
+    const itemsList = cart_items ? cart_items.map(i => `${i.name} (x${i.quantity})`).join('\n') : "";
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
-      subject: `📢 New Order #${orderId}`,
-      text: `
-        🎉 NEW ORDER RECEIVED!
-        
-        Order ID: #${orderId}
-        Customer: ${customer_name}
-        Amount: Rs. ${total_amount}
-        Payment: ${payment_method || 'COD'}
-        
-        ITEMS:
-        ${itemsList}
-      `
+      subject: `New Order #${orderId}`,
+      text: `Customer: ${customer_name}\nAmount: Rs. ${total_amount}\n\nItems:\n${itemsList}`
     });
 
     res.status(200).json({ success: true, message: 'Order Email sent!' });
-
   } catch (error) {
-    console.error("Order Email Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// --- VERCEL EXPORT ---
+// Vercel Export
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`✅ Server running locally on port ${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`Server running on ${PORT}`));
 }
-
 module.exports = app;
