@@ -55,7 +55,7 @@ const Contact = () => {
     <div className="font-sans text-gray-900">
       
       {/* 1. HERO SECTION */}
-      <div className="relative h-[50vh] w-full flex items-center justify-center text-center text-white">
+      <div className="relative h-[100vh] w-full flex items-center justify-center text-center text-white">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=2000" 
