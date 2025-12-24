@@ -34,31 +34,37 @@ const ManageUsers = () => {
   };
 
   return (
-    // Change 1: Responsive Padding
     <div className="min-h-screen bg-gray-50 p-4 md:p-10">
       
+      {/* Back Button */}
       <Link to="/admin/dashboard" className="flex items-center gap-2 mb-6 text-gray-500 hover:text-black transition">
         <ArrowLeft size={20} /> Back to Dashboard
       </Link>
 
-      <h1 className="text-2xl md:text-3xl font-bold mb-8 flex items-center gap-3 text-gray-800">
+      {/* Heading */}
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 flex items-center gap-3 text-gray-800">
         <Users className="text-[#84a93e]" size={28} /> Registered Users
       </h1>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+      {/* --- TABLE CONTAINER (SCROLL FIX HERE) --- */}
+      <div className="bg-white rounded-lg shadow border border-gray-200 w-full overflow-hidden">
         
-        {/* Change 2: Horizontal Scrolling Wrapper */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]"> {/* min-w-800px taake data pichke nahi */}
+        {/* 1. overflow-x-auto: Scroll allow karega */}
+        <div className="overflow-x-auto w-full">
+          
+          {/* 2. min-w-[1000px]: Table ko force karega ke wo bada rahe (pichke nahi) */}
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            
             <thead className="bg-gray-100 border-b">
               <tr>
-                <th className="p-4 font-semibold text-gray-600">Joined Date</th>
-                <th className="p-4 font-semibold text-gray-600">Full Name</th>
-                <th className="p-4 font-semibold text-gray-600">Email</th>
-                <th className="p-4 font-semibold text-gray-600">Phone</th>
-                <th className="p-4 font-semibold text-gray-600 text-center">Action</th>
+                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Joined Date</th>
+                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Full Name</th>
+                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Email</th>
+                <th className="p-4 font-semibold text-gray-600 whitespace-nowrap">Phone</th>
+                <th className="p-4 font-semibold text-gray-600 text-center whitespace-nowrap">Action</th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr><td colSpan="5" className="p-10 text-center text-gray-500">Loading Users...</td></tr>
@@ -67,26 +73,32 @@ const ManageUsers = () => {
               ) : (
                 users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50 transition">
+                    
+                    {/* 3. whitespace-nowrap: Text ko tootne se rokega */}
                     <td className="p-4 text-sm text-gray-500 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Calendar size={14} />
+                        <Calendar size={16} />
                         {new Date(user.created_at).toLocaleDateString()}
                       </div>
                     </td>
+
                     <td className="p-4 font-bold text-gray-800 capitalize whitespace-nowrap">
                       {user.full_name || "N/A"}
                     </td>
+
                     <td className="p-4 text-blue-600 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Mail size={14} /> {user.email}
+                        <Mail size={16} /> {user.email}
                       </div>
                     </td>
+
                     <td className="p-4 text-gray-600 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Phone size={14} /> {user.phone || "N/A"}
+                        <Phone size={16} /> {user.phone || "N/A"}
                       </div>
                     </td>
-                    <td className="p-4 text-center">
+
+                    <td className="p-4 text-center whitespace-nowrap">
                       <button 
                         onClick={() => handleDelete(user.id)}
                         className="bg-red-50 text-red-600 p-2 rounded hover:bg-red-600 hover:text-white transition shadow-sm border border-red-100"
