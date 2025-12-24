@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Truck } from 'lucide-react'; // Truck icon added
+import { ChevronDown, Truck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../supabaseClient';
 
@@ -9,14 +9,14 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   
-  // Payment Method ab Fixed hai 'cod'
+  // Payment Method Fixed 'cod'
   const paymentMethod = 'cod'; 
 
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', address: '', city: '', phone: '', email: ''
   });
 
-  const shippingCost = 250; // Delivery Charges
+  const shippingCost = 250;
   const grandTotal = cartTotal + shippingCost;
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,10 +35,11 @@ const Checkout = () => {
       total_amount: grandTotal,
       status: 'Pending',
       cart_items: cartItems,
-      payment_method: 'Cash on Delivery', // Fixed Value
-      transaction_id: '' // COD mein koi Trx ID nahi hoti
+      payment_method: 'Cash on Delivery',
+      transaction_id: ''
     };
 
+    // 1. Database mein Save
     const { data, error } = await supabase.from('orders').insert([orderData]).select();
 
     if (error) {
@@ -47,14 +48,19 @@ const Checkout = () => {
     } else {
       const newOrderId = data[0].id;
       
-      // Email Sending Logic (Backend)
+      // 2. Email Sending Logic (FIXED URL HERE)
       try {
-        await fetch('https://luxe-backend-nh8occsdk-izhardarbars-projects.vercel.app/api/contact', {
+        // Ghalat tha: .../api/contact
+        // Sahi hai: .../api/order-email
+        await fetch('https://luxe-backend-nh8occsdk-izhardarbars-projects.vercel.app/api/order-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...orderData, orderId: newOrderId })
         });
-      } catch (err) {}
+        console.log("Order Email Sent Successfully");
+      } catch (err) {
+        console.error("Email Failed:", err);
+      }
 
       clearCart();
       navigate('/order-success', { state: { orderId: newOrderId, paymentMethod: 'Cash on Delivery' } });
@@ -69,7 +75,7 @@ const Checkout = () => {
 
         <div className="flex flex-col lg:flex-row gap-12">
           
-          {/* LEFT: FORM (Same fields) */}
+          {/* LEFT: FORM */}
           <div className="w-full lg:w-2/3">
             <h2 className="text-2xl font-bold mb-6 border-b pb-4">Shipping Information</h2>
             <form className="space-y-6">
@@ -102,7 +108,7 @@ const Checkout = () => {
             </form>
           </div>
 
-          {/* RIGHT: ORDER SUMMARY (Only COD) */}
+          {/* RIGHT: ORDER SUMMARY */}
           <div className="w-full lg:w-1/3">
             <div className="border-2 border-gray-100 p-8 rounded-lg bg-white sticky top-24 shadow-sm">
               <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
@@ -127,7 +133,7 @@ const Checkout = () => {
                 <span>Rs. {grandTotal}</span>
               </div>
 
-              {/* PAYMENT INFO BOX */}
+              {/* PAYMENT INFO */}
               <div className="bg-blue-50 border border-blue-200 p-4 rounded mb-6 flex items-start gap-3">
                 <div className="bg-blue-100 p-2 rounded-full text-blue-600">
                   <Truck size={24} />
