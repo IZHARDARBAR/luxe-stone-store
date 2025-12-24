@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { Trash2, ArrowLeft, Star, Tag } from 'lucide-react'; // New Icons added
+import { Trash2, ArrowLeft, Star, Tag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ManageProducts = () => {
@@ -30,17 +30,15 @@ const ManageProducts = () => {
     }
   };
 
-  // --- TOGGLE FEATURE (Trending) ---
   const toggleFeatured = async (id, currentValue) => {
     const { error } = await supabase
       .from('products')
-      .update({ is_featured: !currentValue }) // True ko False, False ko True karega
+      .update({ is_featured: !currentValue })
       .eq('id', id);
 
-    if (!error) fetchProducts(); // Refresh List
+    if (!error) fetchProducts();
   };
 
-  // --- TOGGLE SALE (Flash Sale) ---
   const toggleSale = async (id, currentValue) => {
     const { error } = await supabase
       .from('products')
@@ -51,70 +49,89 @@ const ManageProducts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-10">
-      <Link to="/admin/dashboard" className="flex items-center gap-2 mb-6 text-gray-500 hover:text-black">
+    // Change 1: Padding Responsive (p-4 mobile, md:p-10 laptop)
+    <div className="min-h-screen bg-gray-50 p-4 md:p-10">
+      
+      <Link to="/admin/dashboard" className="flex items-center gap-2 mb-6 text-gray-500 hover:text-black transition">
         <ArrowLeft size={20} /> Back to Dashboard
       </Link>
 
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Manage Inventory</h1>
-        <Link to="/admin/add-product" className="bg-[#84a93e] text-white px-6 py-2 rounded hover:bg-[#6e8f30]">
+      {/* Change 2: Header Stack on Mobile (flex-col), Row on Laptop (md:flex-row) */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Manage Inventory</h1>
+        <Link 
+          to="/admin/add-product" 
+          className="bg-[#84a93e] text-white px-6 py-2 rounded hover:bg-[#6e8f30] w-full md:w-auto text-center shadow-sm transition"
+        >
           + Add New Product
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-gray-100 border-b">
-            <tr>
-              <th className="p-4">Image</th>
-              <th className="p-4">Name</th>
-              <th className="p-4">Price</th>
-              <th className="p-4 text-center">Trending</th>
-              <th className="p-4 text-center">On Sale</th>
-              <th className="p-4 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id} className="border-b hover:bg-gray-50">
-                <td className="p-4">
-                  <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded" />
-                </td>
-                <td className="p-4 font-bold">{product.name}</td>
-                <td className="p-4">Rs. {product.price}</td>
-                
-                {/* --- TRENDING TOGGLE --- */}
-                <td className="p-4 text-center">
-                  <button 
-                    onClick={() => toggleFeatured(product.id, product.is_featured)}
-                    className={`p-2 rounded-full transition ${product.is_featured ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400'}`}
-                    title="Toggle Trending"
-                  >
-                    <Star size={20} fill={product.is_featured ? "currentColor" : "none"} />
-                  </button>
-                </td>
-
-                {/* --- SALE TOGGLE --- */}
-                <td className="p-4 text-center">
-                  <button 
-                    onClick={() => toggleSale(product.id, product.on_sale)}
-                    className={`p-2 rounded-full transition ${product.on_sale ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-400'}`}
-                    title="Toggle Flash Sale"
-                  >
-                    <Tag size={20} />
-                  </button>
-                </td>
-
-                <td className="p-4 text-center">
-                  <button onClick={() => handleDelete(product.id)} className="bg-red-50 text-red-600 p-2 rounded hover:bg-red-600 hover:text-white transition">
-                    <Trash2 size={18} />
-                  </button>
-                </td>
+      <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+        
+        {/* Change 3: Horizontal Scroll for Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]"> {/* min-w-800px taake mobile pe table pichke nahi */}
+            <thead className="bg-gray-100 border-b">
+              <tr>
+                <th className="p-4 font-semibold text-gray-600">Image</th>
+                <th className="p-4 font-semibold text-gray-600">Name</th>
+                <th className="p-4 font-semibold text-gray-600">Price</th>
+                <th className="p-4 text-center font-semibold text-gray-600">Trending</th>
+                <th className="p-4 text-center font-semibold text-gray-600">On Sale</th>
+                <th className="p-4 text-center font-semibold text-gray-600">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {products.map((product) => (
+                <tr key={product.id} className="hover:bg-gray-50 transition">
+                  <td className="p-4">
+                    {/* Image Check logic (Array or String) */}
+                    <img 
+                      src={product.images && product.images.length > 0 ? product.images[0] : product.image} 
+                      alt={product.name} 
+                      className="w-12 h-12 object-cover rounded border border-gray-200" 
+                    />
+                  </td>
+                  <td className="p-4 font-bold text-gray-800 whitespace-nowrap">{product.name}</td>
+                  <td className="p-4 text-gray-600 whitespace-nowrap">Rs. {product.price}</td>
+                  
+                  {/* --- TRENDING TOGGLE --- */}
+                  <td className="p-4 text-center">
+                    <button 
+                      onClick={() => toggleFeatured(product.id, product.is_featured)}
+                      className={`p-2 rounded-full transition shadow-sm ${product.is_featured ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-400'}`}
+                      title="Toggle Trending"
+                    >
+                      <Star size={18} fill={product.is_featured ? "currentColor" : "none"} />
+                    </button>
+                  </td>
+
+                  {/* --- SALE TOGGLE --- */}
+                  <td className="p-4 text-center">
+                    <button 
+                      onClick={() => toggleSale(product.id, product.on_sale)}
+                      className={`p-2 rounded-full transition shadow-sm ${product.on_sale ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-400'}`}
+                      title="Toggle Flash Sale"
+                    >
+                      <Tag size={18} />
+                    </button>
+                  </td>
+
+                  <td className="p-4 text-center">
+                    <button onClick={() => handleDelete(product.id)} className="bg-red-50 text-red-600 p-2 rounded hover:bg-red-600 hover:text-white transition shadow-sm">
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {products.length === 0 && (
+          <div className="p-10 text-center text-gray-500">No products found. Add some!</div>
+        )}
       </div>
     </div>
   );
