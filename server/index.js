@@ -6,25 +6,24 @@ const nodemailer = require('nodemailer');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- CORS SETUP (Standard & Safe) ---
+// --- 1. CORS FIX (CREDENTIALS FALSE KAR DIYA) ---
 app.use(cors({
-  origin: "*", // Sabko allow karo
+  origin: "*", // Sabko allow karo (Mobile, Laptop, Localhost)
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204 // Vercel/Legacy browsers ke liye fix
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  credentials: false // <--- YEH HAI MAGIC FIX (Isay false rakhein)
 }));
 
-// Preflight Requests (OPTIONS) ko explicit allow karo
+// Preflight Requests ko handle karo
 app.options('*', cors());
 
 app.use(express.json());
 
 // --- ROUTES ---
 
+// Test Route
 app.get('/', (req, res) => {
-  res.status(200).json({ message: "Luxe Stone Backend is Live!" });
+  res.json({ message: "Backend is Live & Fixed!" });
 });
 
 // Contact API
@@ -32,7 +31,7 @@ app.post('/api/contact', async (req, res) => {
   const { name, email, phone, message } = req.body;
 
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    return res.status(500).json({ success: false, message: "Server Config Missing" });
+    return res.status(500).json({ success: false, message: "Server Config Error" });
   }
 
   try {
@@ -42,20 +41,20 @@ app.post('/api/contact', async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: email,
+      from: email, 
       to: process.env.EMAIL_USER,
-      subject: `New Contact: ${name}`,
+      subject: `New Contact Msg from ${name}`,
       text: `Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nMessage: ${message}`
     });
 
     res.status(200).json({ success: true, message: 'Email sent!' });
   } catch (error) {
-    console.error("Mail Error:", error);
+    console.error("Email Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// Order API
+// Order Email API
 app.post('/api/order-email', async (req, res) => {
   const { customer_name, total_amount, orderId, cart_items, payment_method } = req.body;
 
