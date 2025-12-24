@@ -1,35 +1,30 @@
 require('dotenv').config();
 const express = require('express');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- 1. MANUAL CORS FIX (THE MAGIC FIX) ---
-app.use((req, res, next) => {
-  // Har request par yeh headers laga do
-  res.header("Access-Control-Allow-Origin", "*"); // Sabko allow karo
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
-  res.header("Access-Control-Allow-Credentials", "true");
+// --- CORS SETUP (Standard & Safe) ---
+app.use(cors({
+  origin: "*", // Sabko allow karo
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204 // Vercel/Legacy browsers ke liye fix
+}));
 
-  // Agar browser pre-check (OPTIONS) kare, toh foran OK bol do
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  
-  next();
-});
+// Preflight Requests (OPTIONS) ko explicit allow karo
+app.options('*', cors());
 
-// --- 2. Standard Middleware ---
 app.use(express.json());
 
 // --- ROUTES ---
 
-// Test Route
 app.get('/', (req, res) => {
-  res.json({ status: "Active", message: "Luxe Stone Backend is Working!" });
+  res.status(200).json({ message: "Luxe Stone Backend is Live!" });
 });
 
 // Contact API
@@ -37,7 +32,7 @@ app.post('/api/contact', async (req, res) => {
   const { name, email, phone, message } = req.body;
 
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    return res.status(500).json({ success: false, message: "Server Config Error" });
+    return res.status(500).json({ success: false, message: "Server Config Missing" });
   }
 
   try {
@@ -47,7 +42,7 @@ app.post('/api/contact', async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: email, 
+      from: email,
       to: process.env.EMAIL_USER,
       subject: `New Contact: ${name}`,
       text: `Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nMessage: ${message}`
@@ -55,12 +50,12 @@ app.post('/api/contact', async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Email sent!' });
   } catch (error) {
-    console.error("Email Error:", error);
+    console.error("Mail Error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// Order Email API
+// Order API
 app.post('/api/order-email', async (req, res) => {
   const { customer_name, total_amount, orderId, cart_items, payment_method } = req.body;
 
