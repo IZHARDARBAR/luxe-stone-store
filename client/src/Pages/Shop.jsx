@@ -39,7 +39,7 @@ const Shop = () => {
 
   return (
     <div className="font-sans text-gray-900 pt-[100px]">
-      <div className="relative h-[40vh] md:h-[50vh] w-full flex items-center justify-center bg-gray-900 mb-10">
+      <div className="relative h-[40vh] md:h-[100vh] w-full flex items-center justify-center bg-gray-900 mb-10">
         <div className="absolute inset-0 overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2000"

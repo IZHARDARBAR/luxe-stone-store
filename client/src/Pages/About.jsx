@@ -39,7 +39,7 @@ const About = () => {
           <div className="w-full md:w-1/2 relative">
             <div className="absolute top-4 left-4 w-full h-full border-2 border-[#84a93e] rounded-lg transform translate-x-2 translate-y-2 z-0"></div>
             <img 
-              src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=800" // Yahan apni Asli Photo ka URL lagayein
+              src="/Izhar.png"
               alt="Izhar Darbar" 
               className="w-full h-auto rounded-lg shadow-xl object-cover relative z-10 aspect-[4/5]"
             />
@@ -133,7 +133,7 @@ const About = () => {
       <section className="relative h-[400px] w-full flex items-center justify-center text-center text-white">
         <div className="absolute inset-0">
           <img 
-            src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=2000" 
+            src="/aboutFooter.png" 
             alt="CTA Background" 
             className="w-full h-full object-cover"
           />
