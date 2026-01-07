@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient'; 
-import { Search, ChevronDown, Star } from 'lucide-react';
+import { Search, ChevronDown, Star, ShoppingBag, Zap } from 'lucide-react'; // Icons added
 import { useCart } from '../context/CartContext'; 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // useNavigate added
 
 const Shop = () => {
   const [shopProducts, setShopProducts] = useState([]);
@@ -48,20 +48,20 @@ const Shop = () => {
   return (
     <div className="font-sans text-gray-900 pt-[100px]">
       
-     {/* HEADER BANNER UPDATE */}
-      <div className="relative h-[80vh] w-full flex items-center justify-center bg-gray-900 mb-10">
+     {/* HEADER BANNER */}
+      <div className="relative h-[40vh] md:h-[50vh] w-full flex items-center justify-center bg-gray-900 mb-10">
         <div className="absolute inset-0 overflow-hidden">
-          {/* New Retail Store Image */}
           <img 
             src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2000" 
             alt="Shop Background" 
             className="w-full h-full object-cover opacity-50"
           />
         </div>
-        <h1 className="relative z-10 text-5xl md:text-6xl font-bold text-white font-serif tracking-wide text-center px-4">
+        <h1 className="relative z-10 text-4xl md:text-6xl font-bold text-white font-serif tracking-wide text-center px-4">
           Explore Our Collection
         </h1>
       </div>
+
       <div className="container mx-auto px-6 md:px-12">
         
         {/* --- SEARCH & FILTER BAR --- */}
@@ -117,23 +117,30 @@ const Shop = () => {
   );
 };
 
-// --- PRODUCT CARD COMPONENT ---
+// --- PRODUCT CARD COMPONENT (UPDATED) ---
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate(); // Navigation hook
   
   // Stock Logic
   const isOutOfStock = product.stock <= 0;
 
-  // Image Logic: Use first image from array, or fallback if empty
+  // Image Logic
   const displayImage = product.images && product.images.length > 0 
     ? product.images[0] 
     : 'https://via.placeholder.com/300?text=No+Image';
 
+  // --- BUY NOW LOGIC ---
+  const handleBuyNow = () => {
+    addToCart(product); // Pehle cart mein add karo
+    navigate('/checkout'); // Phir checkout par bhej do
+  };
+
   return (
-    <div className="group relative">
+    <div className="group relative flex flex-col h-full">
       {/* Link to Detail Page */}
-      <Link to={`/product/${product.id}`}>
-        <div className="relative h-[350px] w-full overflow-hidden bg-gray-100 mb-5 rounded-lg border border-gray-100">
+      <Link to={`/product/${product.id}`} className="block overflow-hidden rounded-lg border border-gray-100 mb-4">
+        <div className="relative h-[350px] w-full bg-gray-100">
           <img
             src={displayImage}
             alt={product.name}
@@ -150,7 +157,7 @@ const ProductCard = ({ product }) => {
       </Link>
 
       {/* Details */}
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col flex-grow">
         <div className="flex text-gray-300 mb-2 gap-0.5">
           {[...Array(5)].map((_, i) => (
             <Star key={i} size={14} fill="currentColor" />
@@ -161,21 +168,30 @@ const ProductCard = ({ product }) => {
           {product.name}
         </h3>
         
-        <p className="text-sm text-gray-500 mb-1">{product.category}</p>
+        <p className="text-sm text-gray-500 mb-3">{product.category}</p>
         
-        <div className="flex justify-between items-center w-full mt-2">
-          <p className="font-bold text-xl text-gray-900">Rs. {product.price}</p>
-          
-          {/* Add to Cart Button (Only if Stock Available) */}
-          {!isOutOfStock && (
+        <p className="font-bold text-xl text-gray-900 mb-4">Rs. {product.price}</p>
+        
+        {/* ACTION BUTTONS (UPDATED) */}
+        {!isOutOfStock && (
+          <div className="flex gap-3 mt-auto">
+            {/* Add to Cart Button */}
             <button 
               onClick={() => addToCart(product)}
-              className="bg-[#84a93e] text-white px-4 py-2 rounded text-sm font-bold hover:bg-[#6e8f30] transition shadow-sm"
+              className="flex-1 bg-black text-white px-4 py-2.5 rounded text-sm font-bold hover:bg-gray-800 transition shadow-sm flex items-center justify-center gap-2"
             >
-              Add to Cart
+              <ShoppingBag size={16} /> Add
             </button>
-          )}
-        </div>
+
+            {/* Buy Now Button */}
+            <button 
+              onClick={handleBuyNow}
+              className="flex-1 bg-[#84a93e] text-white px-4 py-2.5 rounded text-sm font-bold hover:bg-[#6e8f30] transition shadow-sm flex items-center justify-center gap-2"
+            >
+              <Zap size={16} /> Buy Now
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
