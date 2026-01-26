@@ -6,18 +6,18 @@ import { ArrowLeft, UploadCloud, X, Loader } from 'lucide-react';
 const AddProduct = () => {
   const navigate = useNavigate();
   const [uploading, setUploading] = useState(false);
-  
-  // Images
   const [imageFiles, setImageFiles] = useState([]); 
   const [previews, setPreviews] = useState([]);
 
-  // Added 'old_price'
+  // Updated Form State
   const [formData, setFormData] = useState({
-    name: '', price: '', old_price: '', category: 'Electronics', description: ''
+    name: '', price: '', old_price: '', category: 'Electronics', description: '', 
+    stock: 10, sizes: '', colors: '', sale_end: ''
   });
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // Handle Images
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
@@ -35,11 +35,11 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (imageFiles.length === 0) return alert("Select at least 1 image!");
-
     setUploading(true);
     const imageUrls = [];
 
     try {
+      // 1. Upload Images
       for (const file of imageFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
@@ -49,15 +49,24 @@ const AddProduct = () => {
         imageUrls.push(data.publicUrl);
       }
 
-      // Insert (old_price included)
+      // 2. Process Arrays (Comma separated string -> Array)
+      const sizeArray = formData.sizes ? formData.sizes.split(',').map(s => s.trim()) : [];
+      const colorArray = formData.colors ? formData.colors.split(',').map(c => c.trim()) : [];
+
+      // 3. Save to DB
       const { error: dbError } = await supabase
         .from('products')
         .insert([{ 
-          ...formData, 
-          // Agar old_price khali hai to null bhejo
-          old_price: formData.old_price ? formData.old_price : null,
-          images: imageUrls, 
-          stock: 10 
+          name: formData.name,
+          price: formData.price,
+          old_price: formData.old_price || null,
+          category: formData.category,
+          description: formData.description,
+          stock: formData.stock,
+          images: imageUrls,
+          sizes: sizeArray,
+          colors: colorArray,
+          sale_end: formData.sale_end || null
         }]);
 
       if (dbError) throw dbError;
@@ -76,49 +85,53 @@ const AddProduct = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-        <Link to="/admin/dashboard" className="flex items-center gap-2 text-gray-500 mb-6 hover:text-black">
-          <ArrowLeft size={18} /> Back
-        </Link>
-        
-        <h1 className="text-2xl font-bold mb-6">Add Product</h1>
+        <Link to="/admin/dashboard" className="flex items-center gap-2 text-gray-500 mb-6 hover:text-black"><ArrowLeft size={18} /> Back</Link>
+        <h1 className="text-2xl font-bold mb-6">Add Product (Pro)</h1>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <input name="name" onChange={handleChange} placeholder="Product Name" className="w-full border p-3 rounded" required />
           
-          {/* --- PRICE ROW (UPDATED) --- */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Price (Sale Price)</label>
-                <input name="price" type="number" onChange={handleChange} placeholder="e.g. 2500" className="w-full border p-3 rounded" required />
-            </div>
-            <div>
-                <label className="block text-sm font-bold text-gray-500 mb-1">Old Price (Optional)</label>
-                <input name="old_price" type="number" onChange={handleChange} placeholder="e.g. 3000" className="w-full border p-3 rounded bg-gray-50" />
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <input name="price" type="number" onChange={handleChange} placeholder="Price" className="border p-3 rounded" required />
+            <input name="old_price" type="number" onChange={handleChange} placeholder="Old Price (Optional)" className="border p-3 rounded" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <input name="stock" type="number" onChange={handleChange} placeholder="Total Stock (e.g. 10)" className="border p-3 rounded" required />
+            <select name="category" onChange={handleChange} className="border p-3 rounded">
+                <option value="Electronics">Electronics</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Watches">Watches</option>
+                <option value="Shoes">Shoes</option>
+                <option value="Beauty">Beauty</option>
+                <option value="Home">Home</option>
+                <option value="Accessories">Accessories</option>
+            </select>
+          </div>
+
+          {/* --- NEW FIELDS --- */}
+          <div className="grid grid-cols-2 gap-4">
+            <input name="sizes" onChange={handleChange} placeholder="Sizes (e.g. S, M, L, XL)" className="border p-3 rounded" />
+            <input name="colors" onChange={handleChange} placeholder="Colors (e.g. Red, Blue, Black)" className="border p-3 rounded" />
           </div>
           
-          <select name="category" onChange={handleChange} className="w-full border p-3 rounded">
-            <option value="Electronics">Electronics</option>
-            <option value="Fashion">Fashion</option>
-            <option value="Watches">Watches</option>
-            <option value="Shoes">Shoes</option>
-            <option value="Beauty">Beauty</option>
-            <option value="Home">Home</option>
-            <option value="Accessories">Accessories</option>
-            <option value="Kids">Kids</option>
-          </select>
+          <div>
+            <label className="text-xs font-bold text-gray-500">Flash Sale End Date (Optional)</label>
+            <input name="sale_end" type="datetime-local" onChange={handleChange} className="w-full border p-3 rounded" />
+          </div>
 
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
-            <div className="relative h-32 flex flex-col items-center justify-center cursor-pointer border border-gray-200 bg-white rounded mb-4">
+          {/* Image Upload */}
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 text-center">
+            <div className="relative h-20 flex flex-col items-center justify-center cursor-pointer border bg-white rounded mb-2">
               <input type="file" multiple accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-              <UploadCloud className="text-[#84a93e] mb-2" />
-              <span className="text-sm text-gray-500">Click to Select Images</span>
+              <UploadCloud className="text-[#84a93e]" />
+              <span className="text-xs text-gray-500">Upload Images</span>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto">
               {previews.map((src, idx) => (
-                <div key={idx} className="relative w-20 h-20 shrink-0 border rounded">
-                  <img src={src} alt="preview" className="w-full h-full object-cover rounded" />
-                  <button type="button" onClick={() => removeImage(idx)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow"><X size={14} /></button>
+                <div key={idx} className="relative w-12 h-12 shrink-0 border rounded">
+                  <img src={src} className="w-full h-full object-cover rounded" />
+                  <button type="button" onClick={() => removeImage(idx)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X size={10} /></button>
                 </div>
               ))}
             </div>
