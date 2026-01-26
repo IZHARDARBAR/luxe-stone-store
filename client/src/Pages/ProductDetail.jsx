@@ -25,17 +25,20 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // New States
+  // States
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [timeLeft, setTimeLeft] = useState("");
+  const [inWishlist, setInWishlist] = useState(false); // <--- NEW STATE
 
+  // Review Form
   const [reviewForm, setReviewForm] = useState({
     user_name: "",
     rating: 5,
     comment: "",
   });
   const [submitting, setSubmitting] = useState(false);
+
   const { addToCart } = useCart();
   const isAdmin = localStorage.getItem("isAdmin");
 
@@ -44,7 +47,16 @@ const ProductDetail = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Flash Sale Timer Logic
+  // Check Wishlist on Load
+  useEffect(() => {
+    if (product) {
+      const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+      const exists = wishlist.find((p) => p.id === product.id);
+      setInWishlist(!!exists); // Agar hai to True, nahi to False
+    }
+  }, [product]);
+
+  // Flash Sale Timer
   useEffect(() => {
     if (product?.sale_end) {
       const timer = setInterval(() => {
@@ -124,14 +136,22 @@ const ProductDetail = () => {
     }
   };
 
-  const handleWishlist = () => {
+  // --- TOGGLE WISHLIST LOGIC ---
+  const toggleWishlist = () => {
     let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-    if (!wishlist.find((p) => p.id === product.id)) {
+
+    if (inWishlist) {
+      // Remove
+      const newWishlist = wishlist.filter((p) => p.id !== product.id);
+      localStorage.setItem("wishlist", JSON.stringify(newWishlist));
+      setInWishlist(false);
+      toast.error("Removed from Wishlist");
+    } else {
+      // Add
       wishlist.push(product);
       localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      setInWishlist(true);
       toast.success("Added to Wishlist!");
-    } else {
-      toast("Already in Wishlist!", { icon: "❤️" });
     }
   };
 
@@ -190,12 +210,15 @@ const ProductDetail = () => {
               alt={product.name}
               className="w-full h-full object-contain"
             />
+
+            {/* --- HEART BUTTON (DYNAMIC COLOR) --- */}
             <button
-              onClick={handleWishlist}
-              className="absolute top-4 right-4 bg-white p-2 rounded-full shadow hover:text-red-500"
+              onClick={toggleWishlist}
+              className={`absolute top-4 right-4 p-3 rounded-full shadow transition-all duration-300 ${inWishlist ? "bg-red-50 text-red-500" : "bg-white text-gray-400 hover:text-red-500"}`}
             >
-              <Heart />
+              <Heart fill={inWishlist ? "currentColor" : "none"} />
             </button>
+
             {isOutOfStock && (
               <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
                 <span className="bg-red-600 text-white px-4 py-2 font-bold uppercase shadow-lg">
@@ -327,7 +350,44 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Reviews Section */}
+      {/* Reviews & Related Products (Same as before) */}
+      {/* (Code already in previous file, no change needed below) */}
+
+      {/* RELATED PRODUCTS */}
+      {relatedProducts.length > 0 && (
+        <div className="border-t border-gray-200 pt-16 mb-20">
+          <h2 className="text-3xl font-serif font-bold mb-8">
+            You May Also Like
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {relatedProducts.map((item) => (
+              <Link
+                to={`/product/${item.id}`}
+                key={item.id}
+                className="group block"
+              >
+                <div className="bg-gray-100 h-64 rounded-lg overflow-hidden mb-4 border border-gray-200">
+                  <img
+                    src={
+                      item.images && item.images.length > 0
+                        ? item.images[0]
+                        : item.image || "https://via.placeholder.com/300"
+                    }
+                    alt={item.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                  />
+                </div>
+                <h3 className="font-bold text-gray-900 group-hover:text-[#84a93e] transition">
+                  {item.name}
+                </h3>
+                <p className="text-[#84a93e] font-medium">Rs. {item.price}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* REVIEWS SECTION */}
       <div className="border-t border-gray-200 pt-16">
         <h2 className="text-3xl font-serif font-bold mb-8">Customer Reviews</h2>
         <div className="flex flex-col lg:flex-row gap-16">
@@ -358,7 +418,7 @@ const ProductDetail = () => {
               <textarea
                 rows="4"
                 className="w-full border p-3 rounded"
-                placeholder="Review"
+                placeholder="Your Review"
                 value={reviewForm.comment}
                 onChange={(e) =>
                   setReviewForm({ ...reviewForm, comment: e.target.value })
@@ -367,7 +427,7 @@ const ProductDetail = () => {
               ></textarea>
               <button
                 disabled={submitting}
-                className="w-full bg-[#84a93e] text-white py-3 rounded font-bold"
+                className="w-full bg-[#84a93e] text-white py-3 rounded font-bold hover:bg-[#6e8f30]"
               >
                 {submitting ? "Submitting..." : "Submit Review"}
               </button>
@@ -375,7 +435,9 @@ const ProductDetail = () => {
           </div>
           <div className="w-full lg:w-2/3 space-y-6">
             {reviews.length === 0 ? (
-              <p className="text-gray-500 text-center">No reviews yet.</p>
+              <p className="text-gray-500 italic text-center py-10 bg-gray-50 rounded">
+                No reviews yet.
+              </p>
             ) : (
               reviews.map((review) => (
                 <div key={review.id} className="border-b border-gray-100 pb-6">
@@ -385,7 +447,9 @@ const ProductDetail = () => {
                         <User size={20} />
                       </div>
                       <div>
-                        <h4 className="font-bold">{review.user_name}</h4>
+                        <h4 className="font-bold text-gray-900">
+                          {review.user_name}
+                        </h4>
                         <div className="flex text-yellow-500 text-xs">
                           {[...Array(5)].map((_, i) => (
                             <Star
@@ -421,4 +485,5 @@ const ProductDetail = () => {
     </div>
   );
 };
+
 export default ProductDetail;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, Facebook, Instagram, Menu, X, Gem, User, LogIn } from 'lucide-react';
+import { ShoppingBag, Facebook, Instagram, Menu, X, Gem, User, LogIn, Heart } from 'lucide-react'; // Heart added
 import CartSidebar from './CartSidebar';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../supabaseClient'; 
@@ -32,10 +32,10 @@ const Navbar = () => {
     location.pathname === '/order-success' || 
     location.pathname === '/profile' || 
     location.pathname === '/track-order' ||
+    location.pathname === '/wishlist' || // Wishlist page added
     location.pathname.startsWith('/admin') || 
     location.pathname.startsWith('/product');
 
-  // --- FIX HERE: Agar Menu khula hai to WHITE, warna Page ke hisaab se ---
   const textColor = isMobileMenuOpen 
     ? 'text-white' 
     : (isLightPage ? 'text-gray-900' : 'text-white');
@@ -54,11 +54,11 @@ const Navbar = () => {
         <div className="container mx-auto px-6 md:px-12 flex justify-between items-center">
           
           <Link to="/" className={`flex items-center gap-2 z-50 hover:opacity-80 transition ${textColor}`} onClick={() => setIsMobileMenuOpen(false)}>
-            {/* Logo Icon Color Logic Updated */}
             <Gem strokeWidth={1.5} size={28} className={isMobileMenuOpen ? "text-white" : (isLightPage ? "text-gray-900" : "text-white")} />
             <span className="text-xl md:text-2xl font-serif tracking-widest uppercase font-bold">Luxe Stone</span>
           </Link>
 
+          {/* DESKTOP LINKS */}
           <ul className={`hidden md:flex items-center space-x-8 text-sm font-medium tracking-widest uppercase ${textColor}`}>
             {['Home', 'Shop', 'About', 'Contact'].map((item) => (
               <li key={item}>
@@ -72,22 +72,32 @@ const Navbar = () => {
 
           <div className={`flex items-center gap-5 ${textColor}`}>
             
+            {/* DESKTOP ICONS */}
             <div className={`hidden md:flex items-center space-x-4 border-r pr-5 ${isLightPage ? 'border-gray-300' : 'border-gray-500'}`}>
+              
               {user ? (
                 <Link to="/profile" title="My Profile"><User size={18} className="hover:text-[#84a93e]" /></Link>
               ) : (
                 <Link to="/login" title="Login"><LogIn size={18} className="hover:text-[#84a93e]" /></Link>
               )}
-              <a href={fbLink} target="_blank" className="hover:text-[#84a93e]"><Facebook size={18} /></a>
-              <a href={instaLink} target="_blank" className="hover:text-[#84a93e]"><Instagram size={18} /></a>
-              <a href={`https://wa.me/${myNumber}`} target="_blank" className="hover:text-[#25D366]"><WhatsAppIcon size={18} /></a>
+
+              <a href={fbLink} target="_blank" rel="noopener noreferrer" className="hover:text-[#84a93e]"><Facebook size={18} /></a>
+              <a href={instaLink} target="_blank" rel="noopener noreferrer" className="hover:text-[#84a93e]"><Instagram size={18} /></a>
+              <a href={`https://wa.me/${myNumber}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366]"><WhatsAppIcon size={18} /></a>
             </div>
 
+            {/* --- WISHLIST ICON ADDED HERE --- */}
+            <Link to="/wishlist" className="hover:text-red-500 transition" title="Wishlist">
+               <Heart size={24} />
+            </Link>
+
+            {/* Cart Icon */}
             <div className="relative cursor-pointer hover:text-[#84a93e]" onClick={() => setIsCartOpen(true)}>
               <ShoppingBag size={24} />
               <span className="absolute -top-1 -right-2 bg-[#84a93e] text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full shadow-md">{cartCount}</span>
             </div>
 
+            {/* Mobile Menu Button */}
             <button className="md:hidden z-50 focus:outline-none ml-2" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               {isMobileMenuOpen ? <X size={30} /> : <Menu size={30} />}
             </button>
@@ -98,7 +108,8 @@ const Navbar = () => {
       {/* Mobile Menu Overlay */}
       <div className={`fixed inset-0 bg-black z-40 flex flex-col items-center justify-center transition-transform duration-500 ease-in-out md:hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <ul className="flex flex-col items-center space-y-6 text-white text-xl font-serif tracking-widest uppercase mb-8">
-          {['Home', 'Shop', 'About', 'Contact'].map((item) => (
+          {/* Wishlist added to Mobile Menu */}
+          {['Home', 'Shop', 'About', 'Contact', 'Wishlist'].map((item) => (
             <li key={item}>
               <Link to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#84a93e] transition">{item}</Link>
             </li>
@@ -122,9 +133,9 @@ const Navbar = () => {
         </div>
         
         <div className="flex gap-8 text-gray-400">
-          <a href={fbLink} target="_blank"><Facebook size={28} /></a>
-          <a href={instaLink} target="_blank"><Instagram size={28} /></a>
-          <a href={`https://wa.me/${myNumber}`} target="_blank" className="hover:text-[#25D366]"><WhatsAppIcon size={28} /></a>
+          <a href={fbLink} target="_blank" rel="noopener noreferrer"><Facebook size={28} /></a>
+          <a href={instaLink} target="_blank" rel="noopener noreferrer"><Instagram size={28} /></a>
+          <a href={`https://wa.me/${myNumber}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366]"><WhatsAppIcon size={28} /></a>
         </div>
       </div>
 

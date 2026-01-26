@@ -19,6 +19,7 @@ import Checkout from './Pages/Checkout';
 import OrderSuccess from './Pages/OrderSuccess';
 import TrackOrder from './Pages/TrackOrder';
 import Profile from './Pages/Profile';
+import Wishlist from './Pages/Wishlist';
 
 // Admin Pages (Owner)
 import AdminLogin from './Admin/AdminLogin';
@@ -60,6 +61,7 @@ function App() {
         <Route path="/order-success" element={<RequireAuth><OrderSuccess /></RequireAuth>} />
         <Route path="/track-order" element={<RequireAuth><TrackOrder /></RequireAuth>} />
         <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+        <Route path="/wishlist" element={<RequireAuth><Wishlist /></RequireAuth>} />
 
         {/* --- ADMIN ROUTES (Secure) --- */}
         <Route path="/admin" element={<AdminLogin />} />

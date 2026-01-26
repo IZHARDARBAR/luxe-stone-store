@@ -19,7 +19,7 @@ const Checkout = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // --- PLACE ORDER LOGIC (EmailJS Included) ---
+  // --- PLACE ORDER LOGIC (EmailJS Included + Stock Update) ---
   const handlePlaceOrder = async () => {
     // 1. Validation
     if (cartItems.length === 0) return alert("Cart is empty!");
@@ -43,15 +43,33 @@ const Checkout = () => {
 
     if (error) {
       alert("Error Saving Order!");
+      setLoading(false);
     } else {
       const newOrderId = data[0].id;
 
-      // 3. Send Email via EmailJS
+      // 3. Update Stock (Reduce Quantity)
+      for (const item of cartItems) {
+        const { data: productData } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', item.id)
+          .single();
+        
+        if (productData) {
+          const newStock = productData.stock - item.quantity;
+          await supabase
+            .from('products')
+            .update({ stock: newStock >= 0 ? newStock : 0 }) // 0 se kam na ho
+            .eq('id', item.id);
+        }
+      }
+
+      // 4. Send Email via EmailJS
       const serviceID = "service_4ahf5j9"; // Aapki ID
       const templateID = "template_contact"; // Aapki Template ID
       const publicKey = "eeH0BCs9fLDJBPhrJ"; // Aapki Public Key
 
-      // Products List String
+      // Products List String for Email
       const itemsList = cartItems.map(i => `${i.name} (x${i.quantity})`).join('\n');
 
       const templateParams = {
@@ -70,12 +88,12 @@ const Checkout = () => {
         `
       };
 
-      // Email Bhejo
+      // Send Email
       emailjs.send(serviceID, templateID, templateParams, publicKey)
         .then(() => console.log("Email Sent"))
         .catch((err) => console.error("Email Failed", err));
 
-      // 4. Success Redirect
+      // 5. Success Redirect
       clearCart();
       navigate('/order-success', { state: { orderId: newOrderId, paymentMethod: 'Cash on Delivery' } });
     }
