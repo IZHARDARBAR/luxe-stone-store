@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Phone, ArrowRight, Loader, Eye, EyeOff } from 'lucide-react'; // Eye Icons Added
+import { Mail, Lock, User, Phone, ArrowRight, Loader, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Auth = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  // --- PASSWORD VISIBILITY STATE ---
   const [showPassword, setShowPassword] = useState(false); 
 
   const [formData, setFormData] = useState({
@@ -60,16 +58,29 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex w-full bg-white">
       
-      {/* Left Side Image */}
+      {/* --- LEFT SIDE: VIDEO BACKGROUND --- */}
       <div className="hidden lg:flex w-1/2 bg-black items-center justify-center relative overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?q=80&w=2000" alt="Luxury" className="absolute inset-0 w-full h-full object-cover opacity-60" />
+        
+        {/* Video Tag */}
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline // Mobile support ke liye
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        >
+          {/* Yahan apni video ka naam likhein */}
+          <source src="/login-video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
         <div className="relative z-10 text-center text-white px-12">
           <h1 className="text-6xl font-serif font-bold mb-6">Luxe Stone.</h1>
           <p className="text-xl tracking-widest uppercase">Premium Accessories for the Modern Era.</p>
         </div>
       </div>
 
-      {/* Right Side Form */}
+      {/* --- RIGHT SIDE: FORM (Same as before) --- */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-24 py-12 bg-gray-50">
         <div className="max-w-md w-full mx-auto">
           <h2 className="text-4xl font-serif font-bold text-gray-900 mb-2">{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
@@ -94,22 +105,18 @@ const Auth = () => {
               <input name="email" placeholder="Email Address" type="email" className="w-full border p-3 pl-12 rounded-lg focus:outline-[#84a93e] bg-white" onChange={handleChange} required />
             </div>
 
-            {/* --- PASSWORD FIELD WITH EYE ICON --- */}
             <div className="relative">
               <Lock className="absolute left-4 top-3.5 text-gray-400" size={20} />
               <input 
                 name="password" 
                 placeholder="Password" 
-                // Toggle Type here
                 type={showPassword ? "text" : "password"} 
                 className="w-full border p-3 pl-12 pr-12 rounded-lg focus:outline-[#84a93e] bg-white"
                 onChange={handleChange} 
                 required 
               />
-              
-              {/* Toggle Button */}
               <button 
-                type="button" // Important: type button rakhein warna form submit ho jayega
+                type="button" 
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-3.5 text-gray-400 hover:text-gray-600 focus:outline-none"
               >
