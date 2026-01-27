@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Users,
   Printer,
+  Tag, // <--- Tag Icon Added
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -140,33 +141,52 @@ const Dashboard = () => {
             Luxe Admin
           </h2>
           <nav className="space-y-4">
+            {/* Orders */}
             <button className="flex items-center gap-3 text-[#84a93e] font-bold w-full p-2 rounded hover:bg-gray-800 transition">
               <Package size={20} /> Orders
             </button>
+
+            {/* Add Product */}
             <Link
               to="/admin/add-product"
               className="flex items-center gap-3 text-gray-400 hover:text-white w-full p-2 rounded hover:bg-gray-800 transition"
             >
               <Plus size={20} /> Add Product
             </Link>
+
+            {/* Manage Inventory */}
             <Link
               to="/admin/products"
               className="flex items-center gap-3 text-gray-400 hover:text-white w-full p-2 rounded hover:bg-gray-800 transition"
             >
               <Settings size={20} /> Manage Inventory
             </Link>
+
+            {/* --- NEW: MANAGE COUPONS --- */}
+            <Link
+              to="/admin/coupons"
+              className="flex items-center gap-3 text-gray-400 hover:text-white w-full p-2 rounded hover:bg-gray-800 transition"
+            >
+              <Tag size={20} /> Manage Coupons
+            </Link>
+
+            {/* Manage Reviews */}
             <Link
               to="/admin/reviews"
               className="flex items-center gap-3 text-gray-400 hover:text-white w-full p-2 rounded hover:bg-gray-800 transition"
             >
               <MessageSquare size={20} /> Manage Reviews
             </Link>
+
+            {/* Registered Users */}
             <Link
               to="/admin/users"
               className="flex items-center gap-3 text-gray-400 hover:text-white w-full p-2 rounded hover:bg-gray-800 transition"
             >
               <Users size={20} /> Registered Users
             </Link>
+
+            {/* Logout */}
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 text-gray-400 hover:text-red-500 mt-10 w-full p-2 rounded hover:bg-gray-800 transition"
@@ -283,7 +303,6 @@ const Dashboard = () => {
                     </td>
 
                     <td className="p-4 flex items-center gap-2">
-                      {/* PRINT BUTTON */}
                       <button
                         onClick={() => printInvoice(order)}
                         className="bg-gray-100 p-1.5 rounded hover:bg-gray-200 text-gray-600"
