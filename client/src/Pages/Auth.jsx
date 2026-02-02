@@ -69,7 +69,7 @@ const Auth = () => {
           playsInline // Mobile support ke liye
           className="absolute inset-0 w-full h-full object-cover opacity-60"
         >
-          {/* Yahan apni video ka naam likhein */}
+          {/* video link*/}
           <source src="/login-video.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
