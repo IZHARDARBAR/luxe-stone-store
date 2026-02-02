@@ -16,7 +16,7 @@ const Policy = () => {
           <div>
             <h3 className="text-xl font-bold mb-2">1. 7 Days Checking Warranty</h3>
             <p className="text-gray-600 leading-relaxed">
-              We offer a **7-day checking warranty** on all products. If you receive a damaged or incorrect item, you must inform us within 24 hours of delivery.
+              We offer a 7-day checking warranty on all products. If you receive a damaged or incorrect item, you must inform us within 24 hours of delivery.
             </p>
           </div>
         </div>
@@ -27,7 +27,7 @@ const Policy = () => {
           <div>
             <h3 className="text-xl font-bold mb-2">2. Return Process</h3>
             <p className="text-gray-600 leading-relaxed">
-              To initiate a return, please WhatsApp us at **0355-4952450** with a short video showing the defect. We will review it and arrange an exchange.
+              To initiate a return, please WhatsApp us at 0355-4952450 with a short video showing the defect. We will review it and arrange an exchange.
             </p>
           </div>
         </div>
@@ -38,7 +38,7 @@ const Policy = () => {
           <div>
             <h3 className="text-xl font-bold mb-2">3. Refunds & Shipping</h3>
             <p className="text-gray-600 leading-relaxed">
-              Delivery charges (Rs. 250) are non-refundable. For refunds, we transfer the amount via **JazzCash/EasyPaisa** within 3 working days after receiving the returned item.
+              Delivery charges (Rs. 250) are non-refundable. For refunds, we transfer the amount via JazzCash/EasyPaisa within 3 working days after receiving the returned item.
             </p>
           </div>
         </div>
