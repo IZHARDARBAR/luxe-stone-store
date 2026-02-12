@@ -2,13 +2,14 @@ import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { MessageCircle } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion"; // <--- NEW
+import { AnimatePresence, motion } from "framer-motion";
 
 // Components
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import RequireAuth from "./Components/RequireAuth";
 import ProtectedRoute from "./Admin/ProtectedRoute";
+import ScrollToTop from "./Components/ScrollToTop"; // <--- ADDED
 
 // Pages
 import Auth from "./Pages/Auth";
@@ -53,6 +54,9 @@ function App() {
 
   return (
     <div className="bg-white min-h-screen relative">
+      {/* Scroll To Top Logic */}
+      <ScrollToTop />
+
       {/* 1. CUSTOM TOAST STYLING */}
       <Toaster
         position="top-center"
