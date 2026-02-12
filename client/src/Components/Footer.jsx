@@ -18,27 +18,32 @@ const Footer = () => {
     <footer className="bg-[#eff5d8] text-gray-800 pt-10 pb-6 relative">
       <div className="container mx-auto px-6 md:px-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-0 mb-10">
-          <Link to="/" className="flex items-center gap-2 group">
+          
+          <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 group">
             <div className="p-2 border-2 border-black rounded-full transition-transform group-hover:scale-105">
               <Gem strokeWidth={1.5} size={28} className="text-black" />
             </div>
             <span className="text-xl font-serif font-bold tracking-widest uppercase text-black">Luxe Stone Co.</span>
           </Link>
+
           <ul className="flex flex-wrap justify-center gap-8 text-sm font-medium uppercase tracking-wide text-gray-700">
-            <li><Link to="/" className="hover:text-[#84a93e] transition">Home</Link></li>
-            <li><Link to="/shop" className="hover:text-[#84a93e] transition">Shop</Link></li>
-            <li><Link to="/about" className="hover:text-[#84a93e] transition">About</Link></li>
-            <li><Link to="/contact" className="hover:text-[#84a93e] transition">Contact</Link></li>
-            {/* Added Policy Link */}
-            <li><Link to="/policy" className="hover:text-[#84a93e] transition">Return Policy</Link></li>
+            {/* Added onClick={scrollToTop} to all links */}
+            <li><Link to="/" onClick={scrollToTop} className="hover:text-[#84a93e] transition">Home</Link></li>
+            <li><Link to="/shop" onClick={scrollToTop} className="hover:text-[#84a93e] transition">Shop</Link></li>
+            <li><Link to="/about" onClick={scrollToTop} className="hover:text-[#84a93e] transition">About</Link></li>
+            <li><Link to="/contact" onClick={scrollToTop} className="hover:text-[#84a93e] transition">Contact</Link></li>
+            <li><Link to="/policy" onClick={scrollToTop} className="hover:text-[#84a93e] transition">Return Policy</Link></li>
           </ul>
+
           <div className="flex items-center gap-5">
             <a href={fbLink} target="_blank" rel="noopener noreferrer" className="hover:text-[#84a93e]"><Facebook size={20} /></a>
             <a href={instaLink} target="_blank" rel="noopener noreferrer" className="hover:text-[#84a93e]"><Instagram size={20} /></a>
             <a href={`https://wa.me/${myNumber}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#25D366]"><WhatsAppIcon size={20} /></a>
           </div>
         </div>
+        
         <div className="border-t border-gray-300/50 w-full mb-6"></div>
+        
         <div className="flex flex-col md:flex-row justify-center items-center relative">
           <p className="text-gray-500 text-sm text-center">Copyright © 2025 Luxe Stone eCommerce. All Rights Reserved.</p>
           <button onClick={scrollToTop} className="hidden md:flex absolute right-0 bottom-[-10px] bg-[#84a93e] hover:bg-[#6e8f30] text-white p-3 rounded shadow-md transition-all hover:-translate-y-1"><ChevronUp size={20} /></button>
