@@ -51,8 +51,8 @@ const About = () => {
               A Vision Born in 2025.
             </h2>
             <p className="text-gray-600 mb-6 leading-relaxed text-lg">
-              What started as a vision in **2025** has now grown into a premium destination for quality products. 
-              **Luxe Stone** was founded with a simple mission: to make high-quality Fashion, Electronics, and Accessories accessible to everyone in Pakistan.
+              What started as a vision in 2025 has now grown into a premium destination for quality products. 
+              Luxe Stone was founded with a simple mission: to make high-quality Fashion, Electronics, and Accessories accessible to everyone in Pakistan.
             </p>
             <p className="text-gray-600 mb-8 leading-relaxed text-lg">
               We don't just sell products; we deliver trust. From our warehouse to your doorstep, every step is handled with care to ensure you get the best experience.
