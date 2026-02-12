@@ -9,7 +9,7 @@ const AddProduct = () => {
   const [imageFiles, setImageFiles] = useState([]); 
   const [previews, setPreviews] = useState([]);
 
-  // Updated Form State
+  // Form State
   const [formData, setFormData] = useState({
     name: '', price: '', old_price: '', category: 'Electronics', description: '', 
     stock: 10, sizes: '', colors: '', sale_end: ''
@@ -43,30 +43,38 @@ const AddProduct = () => {
       for (const file of imageFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+        
         const { error } = await supabase.storage.from('product-images').upload(fileName, file);
         if (error) throw error;
+        
         const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
         imageUrls.push(data.publicUrl);
       }
 
-      // 2. Process Arrays (Comma separated string -> Array)
+      // 2. Prepare Data (Clean Empty Strings to NULL)
       const sizeArray = formData.sizes ? formData.sizes.split(',').map(s => s.trim()) : [];
       const colorArray = formData.colors ? formData.colors.split(',').map(c => c.trim()) : [];
+      
+      // --- FIX IS HERE (Validation) ---
+      const finalPrice = formData.price ? Number(formData.price) : 0;
+      const finalStock = formData.stock ? Number(formData.stock) : 0;
+      const finalOldPrice = formData.old_price ? Number(formData.old_price) : null; // Empty string ko NULL banao
+      const finalSaleEnd = formData.sale_end ? formData.sale_end : null; // Date ko bhi check karo
 
-      // 3. Save to DB
+      // 3. Save to Database
       const { error: dbError } = await supabase
         .from('products')
         .insert([{ 
           name: formData.name,
-          price: formData.price,
-          old_price: formData.old_price || null,
+          price: finalPrice,
+          old_price: finalOldPrice,
           category: formData.category,
           description: formData.description,
-          stock: formData.stock,
+          stock: finalStock,
           images: imageUrls,
           sizes: sizeArray,
           colors: colorArray,
-          sale_end: formData.sale_end || null
+          sale_end: finalSaleEnd
         }]);
 
       if (dbError) throw dbError;
@@ -75,8 +83,8 @@ const AddProduct = () => {
       navigate('/admin/dashboard');
 
     } catch (error) {
-      console.error(error);
-      alert('Upload Failed!');
+      console.error("Upload Error:", error);
+      alert(`Error: ${error.message}`);
     } finally {
       setUploading(false);
     }
@@ -86,7 +94,7 @@ const AddProduct = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
         <Link to="/admin/dashboard" className="flex items-center gap-2 text-gray-500 mb-6 hover:text-black"><ArrowLeft size={18} /> Back</Link>
-        <h1 className="text-2xl font-bold mb-6">Add Product (Pro)</h1>
+        <h1 className="text-2xl font-bold mb-6">Add Product</h1>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <input name="name" onChange={handleChange} placeholder="Product Name" className="w-full border p-3 rounded" required />
@@ -109,10 +117,9 @@ const AddProduct = () => {
             </select>
           </div>
 
-          {/* --- NEW FIELDS --- */}
           <div className="grid grid-cols-2 gap-4">
-            <input name="sizes" onChange={handleChange} placeholder="Sizes (e.g. S, M, L, XL)" className="border p-3 rounded" />
-            <input name="colors" onChange={handleChange} placeholder="Colors (e.g. Red, Blue, Black)" className="border p-3 rounded" />
+            <input name="sizes" onChange={handleChange} placeholder="Sizes (e.g. S, M, L)" className="border p-3 rounded" />
+            <input name="colors" onChange={handleChange} placeholder="Colors (e.g. Red, Blue)" className="border p-3 rounded" />
           </div>
           
           <div>
@@ -120,7 +127,7 @@ const AddProduct = () => {
             <input name="sale_end" type="datetime-local" onChange={handleChange} className="w-full border p-3 rounded" />
           </div>
 
-          {/* Image Upload */}
+          {/* Image Upload UI */}
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 text-center">
             <div className="relative h-20 flex flex-col items-center justify-center cursor-pointer border bg-white rounded mb-2">
               <input type="file" multiple accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
