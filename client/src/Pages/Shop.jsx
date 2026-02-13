@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient'; 
-import { Search, ChevronDown, Star, ShoppingBag, Zap, Eye, X } from 'lucide-react'; // Eye, X added
+import { Search, Star, ShoppingBag, Zap, Eye, X } from 'lucide-react'; // Arrows removed
 import { useCart } from '../context/CartContext'; 
 import { Link, useNavigate } from 'react-router-dom';
-import SkeletonCard from '../Components/SkeletonCard'; // Import Skeleton
+import SkeletonCard from '../Components/SkeletonCard'; 
 
 const Shop = () => {
   const [shopProducts, setShopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  
-  // --- QUICK VIEW STATE ---
   const [quickViewProduct, setQuickViewProduct] = useState(null);
+  
+  const scrollRef = useRef(null); 
   const { addToCart } = useCart();
 
   const categories = ['All', 'Electronics', 'Fashion', 'Watches', 'Shoes', 'Beauty', 'Home', 'Accessories', 'Kids'];
 
+  // --- FETCH DATA ---
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -31,6 +32,20 @@ const Shop = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, selectedCategory]);
 
+  // --- MOUSE WHEEL SCROLL LOGIC ---
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) {
+      const onWheel = (e) => {
+        if (e.deltaY === 0) return;
+        e.preventDefault(); // Page ko neeche jane se roko
+        el.scrollLeft += e.deltaY; // Horizontal Scroll karo
+      };
+      el.addEventListener("wheel", onWheel);
+      return () => el.removeEventListener("wheel", onWheel);
+    }
+  }, []);
+
   return (
     <div className="font-sans text-gray-900 pt-[100px] relative">
       
@@ -43,20 +58,37 @@ const Shop = () => {
       </div>
 
       <div className="container mx-auto px-6 md:px-12">
-        {/* Search & Filter */}
+        
+        {/* --- SEARCH & CATEGORY BAR --- */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-10">
+          
+          {/* Search */}
           <div className="relative w-full md:w-96">
             <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full border rounded-full py-3 pl-12 pr-4 focus:outline-[#84a93e]" />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide w-full md:w-auto">
+
+          {/* Categories (Mouse Wheel Enabled) */}
+          <div 
+            ref={scrollRef}
+            className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto scroll-smooth whitespace-nowrap"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+            
             {categories.map((cat) => (
-              <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-6 py-2 rounded-full text-sm font-bold border whitespace-nowrap ${selectedCategory === cat ? 'bg-black text-white' : 'bg-white hover:border-black'}`}>{cat}</button>
+              <button 
+                key={cat} 
+                onClick={() => setSelectedCategory(cat)} 
+                className={`px-6 py-2 rounded-full text-sm font-bold border transition shrink-0 ${selectedCategory === cat ? 'bg-black text-white' : 'bg-white hover:border-black'}`}
+              >
+                {cat}
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Product Grid with Skeletons */}
+        {/* Product Grid */}
         <section className="pb-24">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
@@ -74,25 +106,19 @@ const Shop = () => {
         </section>
       </div>
 
-      {/* --- QUICK VIEW MODAL --- */}
+      {/* Quick View Modal */}
       {quickViewProduct && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden relative flex flex-col md:flex-row h-auto max-h-[90vh]">
             <button onClick={() => setQuickViewProduct(null)} className="absolute top-4 right-4 bg-white p-2 rounded-full shadow hover:bg-red-50 hover:text-red-500 z-10 transition"><X size={20}/></button>
-            
             <div className="w-full md:w-1/2 h-64 md:h-auto bg-gray-100 relative">
-              <img 
-                src={quickViewProduct.images?.[0] || quickViewProduct.image} 
-                className="w-full h-full object-cover" 
-              />
+              <img src={quickViewProduct.images?.[0] || quickViewProduct.image} className="w-full h-full object-cover" />
             </div>
-            
             <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-y-auto">
               <span className="text-[#84a93e] font-bold text-xs uppercase mb-2">{quickViewProduct.category}</span>
               <h2 className="text-3xl font-bold mb-4">{quickViewProduct.name}</h2>
               <p className="text-2xl font-bold text-gray-900 mb-6">Rs. {quickViewProduct.price}</p>
               <p className="text-gray-600 mb-8 leading-relaxed text-sm line-clamp-4">{quickViewProduct.description}</p>
-              
               <div className="flex flex-col gap-3">
                  <button onClick={() => { addToCart(quickViewProduct); setQuickViewProduct(null); }} className="w-full bg-black text-white py-3 rounded font-bold hover:bg-gray-800 transition">Add to Cart</button>
                  <Link to={`/product/${quickViewProduct.id}`} className="w-full border-2 border-black text-center py-3 rounded font-bold hover:bg-black hover:text-white transition">View Full Details</Link>
@@ -125,18 +151,12 @@ const ProductCard = ({ product, onQuickView }) => {
             {isOutOfStock && <div className="absolute inset-0 flex items-center justify-center bg-black/10"><span className="bg-red-600 text-white px-4 py-2 font-bold text-sm uppercase shadow-lg">Out of Stock</span></div>}
           </div>
         </Link>
-        
-        {/* Quick View Button on Image Hover */}
         {!isOutOfStock && (
-          <button 
-            onClick={onQuickView}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-full shadow-lg font-bold text-xs uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black hover:text-white flex items-center gap-2 z-20"
-          >
+          <button onClick={onQuickView} className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-black px-4 py-2 rounded-full shadow-lg font-bold text-xs uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black hover:text-white flex items-center gap-2 z-20">
             <Eye size={14} /> Quick View
           </button>
         )}
       </div>
-
       <div className="flex flex-col flex-grow">
         <div className="flex text-gray-300 mb-2 gap-0.5">{[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}</div>
         <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-[#84a93e] transition">{product.name}</h3>
